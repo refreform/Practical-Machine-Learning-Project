@@ -1,0 +1,84 @@
+---
+title: "Practical Machine Learning Project"
+author: "refreform"
+date: "`r Sys.Date()`"
+output: html_document
+---
+## Overview/ Data Import  
+This project looks at the pml barbell lifts dataset. I divide the data into a 
+training and validation set (given the test set is provided as part of the 
+assignment, but does not come with the answers).
+```{r import, echo=FALSE}
+#import data and change variable being predicted into a factor
+library(caret)
+test<-read.csv("~/pml-testing.csv")
+training<-read.csv("~/pml-training.csv")
+training$classe<-factor(training$classe)
+
+# Break up training into training and testing
+inValidate <- createDataPartition(training$classe, p = 3/4, list = FALSE)
+tru_train<-training[-inValidate,]
+validation<-training[inValidate,]
+```
+
+## Cleaning  
+I also clean up the data as there are many columns with almost all null values,
+and I remove a couple columns that simply confuse the model, X and user_name. I
+also realized all the valuable data was of the type numeric, due to how the 
+monitors report data, so I only looked at columns with that datatype. All the 
+other columns appeared to simply be noise.
+```{r cleaning, echo=FALSE}
+#looking at nulls
+na_counts <- colSums(is.na(tru_train))
+na_prop <- colMeans(is.na(tru_train))
+bad_cols <- na_prop > 0.9
+
+#cleaning data by removing columns that are majority NA
+tru_train_clean <- tru_train[, !bad_cols]
+tru_train_clean<-tru_train_clean[3:93]
+validation_clean <- validation[,!bad_cols]
+validation_clean<-validation_clean[3:93]
+
+# using only columns that are numerics, as after investigating the data
+# it would appear most other columns are either not relevant to predicting
+# (such as X and name) or consistently blank
+num_cols <- sapply(tru_train_clean, is.numeric)
+number_train_clean<-tru_train_clean[,num_cols]
+validation_clean<-validation_clean[,num_cols]
+number_train_clean<-data.frame(tru_train$classe,number_train_clean)
+names(number_train_clean)[1]<-'classe'
+validation_clean<-data.frame(validation$classe,validation_clean)
+names(validation_clean)[1]<-'classe'
+```
+
+## Training  
+After cleaning, I train the model on teh training set, which takes quite a 
+while. I then look at the prediction set for both the test and validation set.
+```{r training, echo=FALSE}
+model<-caret::train(classe~.,data=number_train_clean,method='gbm',verbose=FALSE)
+```
+
+## Prediction  
+My training set has a near 100% accuracy, while the validation set has a
+slightly lower accuracy, but not by much. It's still at roughly 99% accuracy. 
+This leads me to believe the out of sample error rate is small, <1% in all 
+likelihood. 
+
+```{r prediction, echo=FALSE}
+prediction_train<-predict(model,newdata=number_train_clean)
+confusionMatrix(prediction_train,number_train_clean$classe)
+
+prediction_validate<-predict(model,newdata=validation_clean)
+confusionMatrix(prediction_validate,validation_clean$classe)
+
+prediction_test<-predict(model,newdata=test)
+```
+
+## Test Set Results  
+Lastly, I print the predictions for the 20 test datapoints as requested. 
+
+I have since running this verified with the quiz and had a 95% accuracy with 
+those 20 data points.
+```{r test restults, echo=FALSE}
+prediction_test
+```
