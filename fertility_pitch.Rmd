@@ -1,0 +1,35 @@
+---
+title: "Fertility App Pitch"
+author: "refreform"
+date: "`r Sys.Date()`"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Why a Fertility App?
+
+This app is intended as a proof of concept for giving individuals the ability to 
+examine what impacts fertility. Fertility is a big issue today around the world,
+and so allowing people to explore it is very important.
+
+## How does the app work?
+
+- Input what factors you want the model to take into account
+- Hit the Run Button
+- ???
+- Profit
+
+## Summary of the underlying data
+
+```{r cars, echo = TRUE}
+data(swiss)
+summary(swiss)
+```
+
+## Closing Remarks
+
+This project will need updated as right now the graph is not particularly 
+useful, as it is basically static atm.
