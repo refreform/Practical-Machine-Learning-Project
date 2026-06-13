@@ -52,7 +52,7 @@ names(validation_clean)[1]<-'classe'
 ```
 
 ## Training  
-After cleaning, I train the model on teh training set, which takes quite a 
+After cleaning, I train the model on the training set, which takes quite a 
 while. I then look at the prediction set for both the test and validation set.
 ```{r training, echo=FALSE}
 model<-caret::train(classe~.,data=number_train_clean,method='gbm',verbose=FALSE)
